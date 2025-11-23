@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure User Activity Log - TEST MODE</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            border-left: 5px solid #4285f4;
+        }
+
+        header h1 {
+            color: #4285f4;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .test-badge {
+            background: #ff6b6b;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .user-info {
+            color: #666;
+            font-size: 16px;
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 6px;
+            border-left: 3px solid #34a853;
+        }
+
+        .actions {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 25px;
+            text-align: center;
+            border-left: 5px solid #fbbc05;
+        }
+
+        .btn-primary {
+            background: #4285f4;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(66, 133, 244, 0.3);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(66, 133, 244, 0.4);
+        }
+
+        .btn-primary:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #333;
+            border: 1px solid #dadce0;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #e8eaed;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 6px;
+            display: none;
+            border-left: 4px solid;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+
+        .logs {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            border-left: 5px solid #34a853;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .logs h2 {
+            color: #4285f4;
+            margin-bottom: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .log-entry {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            align-items: center;
+            transition: background 0.2s ease;
+        }
+
+        .log-entry:hover {
+            background: #f8f9fa;
+        }
+
+        .log-entry:last-child {
+            border-bottom: none;
+        }
+
+        .timestamp {
+            color: #666;
+            font-size: 14px;
+            flex: 1;
+            font-family: 'Courier New', monospace;
+        }
+
+        .activity-type {
+            font-weight: 600;
+            color: #333;
+            flex: 1;
+            text-align: center;
+            padding: 4px 8px;
+            border-radius: 4px;
+            background: #f8f9fa;
+        }
+
+        .log-id {
+            color: #999;
+            font-size: 12px;
+            flex: 0.5;
+            font-family: 'Courier New', monospace;
+        }
+
+        .loading {
+            text-align: center;
+            color: #666;
+            padding: 30px;
+            font-size: 16px;
+        }
+
+        .demo-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 20px;
+            color: #856404;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .log-entry {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>
+                🔐 Secure User Activity Log 
+                <span class="test-badge">LOCAL TEST MODE</span>
+            </h1>
+            <div class="user-info">
+                Welcome, <strong>{{ user_name }}</strong> ({{ user_email }})
+            </div>
+        </header>
+
+        <main>
+            <section class="actions">
+                <button id="notificationBtn" class="btn-primary">📧 Send Mock Notification</button>
+                <div id="notificationStatus" class="status"></div>
+            </section>
+
+            <section class="logs">
+                <div class="logs-header">
+                    <h2>📊 Recent Activity Logs</h2>
+                    <button id="refreshLogs" class="btn-secondary">🔄 Refresh Logs</button>
+                </div>
+                <div id="logsContainer">
+                    {% if logs %}
+                        {% for log in logs %}
+                        <div class="log-entry">
+                            <span class="log-id">#{{ log.id }}</span>
+                            <span class="timestamp">{{ log.timestamp }}</span>
+                            <span class="activity-type">{{ log.activity_type }}</span>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="loading">No activity logs found. Start by refreshing the page or sending a notification.</div>
+                    {% endif %}
+                </div>
+            </section>
+
+            <div class="demo-info">
+                <strong>💡 Demo Information:</strong>
+                <ul style="margin-top: 10px; margin-left: 20px;">
+                    <li>This is a local test version - no database required</li>
+                    <li>All data is stored in memory and will reset when server restarts</li>
+                    <li>Pub/Sub notifications are simulated</li>
+                    <li>Try different email addresses to test access control</li>
+                </ul>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notificationBtn = document.getElementById('notificationBtn');
+            const refreshLogsBtn = document.getElementById('refreshLogs');
+            const notificationStatus = document.getElementById('notificationStatus');
+            const logsContainer = document.getElementById('logsContainer');
+
+            notificationBtn.addEventListener('click', sendNotification);
+            refreshLogsBtn.addEventListener('click', refreshLogs);
+
+            async function sendNotification() {
+                try {
+                    notificationBtn.disabled = true;
+                    notificationBtn.textContent = 'Sending Mock Notification...';
+                    notificationStatus.style.display = 'none';
+
+                    const response = await fetch('/api/send-notification', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        showStatus('✅ ' + result.status + ' - ' + result.note, 'success');
+                        // Refresh logs to show the new notification activity
+                        setTimeout(refreshLogs, 1000);
+                    } else {
+                        showStatus('❌ ' + (result.error || 'Failed to send notification'), 'error');
+                    }
+                } catch (error) {
+                    showStatus('❌ Error sending notification: ' + error.message, 'error');
+                } finally {
+                    notificationBtn.disabled = false;
+                    notificationBtn.textContent = '📧 Send Mock Notification';
+                }
+            }
+
+            async function refreshLogs() {
+                try {
+                    refreshLogsBtn.disabled = true;
+                    refreshLogsBtn.textContent = 'Refreshing...';
+                    logsContainer.innerHTML = '<div class="loading">Loading logs...</div>';
+
+                    const response = await fetch('/api/logs');
+                    const result = await response.json();
+
+                    if (response.ok) {
+                        displayLogs(result.logs);
+                    } else {
+                        logsContainer.innerHTML = '<div class="loading">Error loading logs: ' + (result.error || 'Unknown error') + '</div>';
+                    }
+                } catch (error) {
+                    logsContainer.innerHTML = '<div class="loading">Error loading logs: ' + error.message + '</div>';
+                } finally {
+                    refreshLogsBtn.disabled = false;
+                    refreshLogsBtn.textContent = '🔄 Refresh Logs';
+                }
+            }
+
+            function displayLogs(logs) {
+                if (!logs || logs.length === 0) {
+                    logsContainer.innerHTML = '<div class="loading">No activity logs found. Try refreshing the page or sending a notification.</div>';
+                    return;
+                }
+
+                const logsHTML = logs.map(log => `
+                    <div class="log-entry">
+                        <span class="log-id">#${log.id}</span>
+                        <span class="timestamp">${log.timestamp}</span>
+                        <span class="activity-type">${log.activity_type}</span>
+                    </div>
+                `).join('');
+
+                logsContainer.innerHTML = logsHTML;
+            }
+
+            function showStatus(message, type) {
+                notificationStatus.textContent = message;
+                notificationStatus.className = `status ${type}`;
+                notificationStatus.style.display = 'block';
+                
+                setTimeout(() => {
+                    notificationStatus.style.display = 'none';
+                }, 5000);
+            }
+
+            // Auto-refresh logs every 10 seconds
+            setInterval(refreshLogs, 10000);
+        });
+    </script>
+</body>
+</html>
